@@ -19,7 +19,10 @@ class ChallengeSerializer(serializers.ModelSerializer):
 #  챌린지 생성 Serializer
 class ChallengeCreateSerializer(serializers.ModelSerializer):
     user_ids = serializers.ListField(
-        child=serializers.IntegerField(), write_only=True, required=True
+        child=serializers.IntegerField(),
+        write_only=True,
+        required=True,
+        help_text="참가자 ID 리스트",
     )  # 참가자 ID 리스트를 추가
 
     class Meta:
@@ -27,8 +30,9 @@ class ChallengeCreateSerializer(serializers.ModelSerializer):
         fields = ["condition", "start_date", "duration", "total_bet_coins", "user_ids"]
 
     def create(self, validated_data):
-        user_ids = validated_data.pop("user_ids")
         request_user = self.context["request"].user
+
+        user_ids = self.initial_data.get("user_ids", [])
 
         challenge = Challenge.objects.create(**validated_data)
         challenge.participants.add(request_user)  # 생성자를 기본 참가자로 등록
